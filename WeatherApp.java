@@ -1,13 +1,16 @@
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class WeatherApp {
     private static final String API_KEY = "f47667a6aac6467596b214543240907";
     private static final String BASE_URL = "http://api.weatherapi.com/v1/current.json";
     private static final Map<String, String> cache = new HashMap<>();
+    private static final Set<String> favoriteCities = new HashSet<>();
 
     public static String getWeather(String city) {
         try {
@@ -38,22 +41,40 @@ public class WeatherApp {
     }
 
     public static void main(String[] args) {
-        System.out.print("Enter city names separated by commas: ");
         Scanner scanner = new Scanner(System.in);
-        String[] cities = scanner.nextLine().split(",");
-        for (String city : cities) {
-            city = city.trim();
-            String weatherData = cache.get(city);
-            if (weatherData == null) {
-                weatherData = getWeather(city);
-                if (weatherData != null) {
-                    cache.put(city, weatherData);
+        while (true) {
+            System.out.print("Enter command (weather, add_favorite, show_favorites, quit): ");
+            String command = scanner.nextLine();
+            if (command.equals("weather")) {
+                System.out.print("Enter city names separated by commas: ");
+                String[] cities = scanner.nextLine().split(",");
+                for (String city : cities) {
+                    city = city.trim();
+                    String weatherData = cache.get(city);
+                    if (weatherData == null) {
+                        weatherData = getWeather(city);
+                        if (weatherData != null) {
+                            cache.put(city, weatherData);
+                        }
+                    }
+                    if (weatherData != null) {
+                        System.out.println("Weather in " + city + ":");
+                        displayWeather(weatherData);
+                        System.out.println();
+                    }
                 }
-            }
-            if (weatherData != null) {
-                System.out.println("Weather in " + city + ":");
-                displayWeather(weatherData);
-                System.out.println();
+            } else if (command.equals("add_favorite")) {
+                System.out.print("Enter city name to add to favorites: ");
+                String city = scanner.nextLine().trim();
+                favoriteCities.add(city);
+                System.out.println(city + " added to favorites.");
+            } else if (command.equals("show_favorites")) {
+                System.out.println("Favorite Cities:");
+                for (String city : favoriteCities) {
+                    System.out.println(city);
+                }
+            } else if (command.equals("quit")) {
+                break;
             }
         }
         scanner.close();
