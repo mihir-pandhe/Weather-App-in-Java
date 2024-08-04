@@ -18,6 +18,10 @@ public class WeatherApp {
             URL url = new URL(BASE_URL + "?key=" + API_KEY + "&q=" + city);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            int responseCode = conn.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                throw new RuntimeException("HttpResponseCode: " + responseCode);
+            }
             Scanner scanner = new Scanner(url.openStream());
             StringBuilder response = new StringBuilder();
             while (scanner.hasNext()) {
@@ -26,18 +30,22 @@ public class WeatherApp {
             scanner.close();
             return response.toString();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error fetching weather data: " + e.getMessage());
             return null;
         }
     }
 
     public static void displayWeather(String data) {
-        String temperature = data.split("temp_c\":")[1].split(",")[0];
-        String humidity = data.split("humidity\":")[1].split(",")[0];
-        String windSpeed = data.split("wind_kph\":")[1].split(",")[0];
-        System.out.println("Temperature: " + temperature + "°C");
-        System.out.println("Humidity: " + humidity + "%");
-        System.out.println("Wind Speed: " + windSpeed + " kph");
+        if (data != null && data.contains("current")) {
+            String temperature = data.split("temp_c\":")[1].split(",")[0];
+            String humidity = data.split("humidity\":")[1].split(",")[0];
+            String windSpeed = data.split("wind_kph\":")[1].split(",")[0];
+            System.out.println("Temperature: " + temperature + "°C");
+            System.out.println("Humidity: " + humidity + "%");
+            System.out.println("Wind Speed: " + windSpeed + " kph");
+        } else {
+            System.out.println("Error: Invalid data format received.");
+        }
     }
 
     public static void main(String[] args) {
